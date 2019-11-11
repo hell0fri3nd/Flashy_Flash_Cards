@@ -1,8 +1,14 @@
 import * as React from 'react';
 import { Text, View, StyleSheet, Button, TextInput } from 'react-native';
 import Constants from 'expo-constants';
+
+// imported custom files
 import decks from './flashcards';
 import styles from './stylesheet';
+import Home from './Home';
+import DeckMenu from './DeckMenu';
+import TestQuestion from './TestQuestion'
+import TestAnswer from './TestAnswer'
 
 // or any pure javascript modules available in npm
 import { Card } from 'react-native-paper';
@@ -20,6 +26,10 @@ export default class App extends React.Component {
     tempCrdQuest: '',
     tempCrdAns: '',
   };
+
+  stateHandler(s) {
+    this.setState(s);
+  }
 
   goBackBtn(prev, dk) {
     return (
@@ -127,174 +137,42 @@ export default class App extends React.Component {
 
   render() {
     if (this.state.page === 'home') {
-      const homeMenu = decks.map((deck, i) => {
-        return (
-          <Button
-            title={deck.name}
-            onPress={() => {
-              this.setState({ page: 'deckMenu', currDeck: i });
-            }}
-          />
-        );
-      });
-
-      const newDeckBtn = (
-        <Button
-          color="green"
-          title="Create a new deck"
-          onPress={() => this.setState({ page: 'addDeck' })}
-        />
-      );
-
       return (
-        <View style={styles.container}>
-          <Text style={styles.title}> Flashy Flash Cards </Text>
-          <Text style={styles.subtitle}>
-            {' '}
-            <i>Learn effectively exploiting Spaced Repetition!</i>{' '}
-          </Text>
-          {homeMenu}
-          {newDeckBtn}
-        </View>
+        <Home
+          decks={decks}
+          state={this.state}
+          stateHandler={this.stateHandler.bind(this)}
+        />
       );
     } else if (this.state.page === 'deckMenu') {
-      const addCardBtn = (
-        <Button
-          title="Add a custom Card to Deck"
-          onPress={() =>
-            this.setState({
-              page: 'addCard',
-            })
-          }
-        />
-      );
-
-      const deletCardBtn = (
-        <Button
-          title="Delete card from Deck"
-          onPress={() =>
-            this.setState({
-              page: 'deleteCard',
-            })
-          }
-        />
-      );
-
-      const deleteDeckBtn = (
-        <Button
-          color="#ffcc00"
-          title="Delete Deck"
-          onPress={() => {
-            if (
-              window.confirm(
-                'Are you sure you want to delete ' +
-                  decks[this.state.currDeck].name +
-                  '?'
-              )
-            ) {
-              this.deleteDeck();
-            }
-          }}
-        />
-      );
-
-      const renameDeckBtn = (
-        <Button
-          title="Rename Deck"
-          onPress={() =>
-            this.setState({
-              page: 'renameDeck',
-            })
-          }
-        />
-      );
-
-      const startBtn = (
-        <Button
-          title="Start!"
-          color="green"
-          onPress={() => {
-            if (decks[this.state.currDeck].cards.length != 0) {
-              this.setState({
-                page: 'test.quest',
-                currCard: 0,
-                startTime: Date.now,
-              });
-            } else {
-              alert('Your deck is empty, add new Cards and start learning!');
-            }
-          }}
-        />
-      );
-
       return (
-        <View style={styles.container}>
-          <Text style={styles.title}>{decks[this.state.currDeck].name}</Text>
-          {startBtn}
-          {addCardBtn}
-          {deletCardBtn}
-          {renameDeckBtn}
-          {deleteDeckBtn}
-          {this.goBackBtn('home', -1)}
-        </View>
+        <DeckMenu
+          decks={decks}
+          state={this.state}
+          goBackBtn={this.goBackBtn.bind(this)}
+          deleteDeck={this.deleteDeck.bind(this)}
+          stateHandler={this.stateHandler.bind(this)}
+        />
       );
     } else if (this.state.page === 'test.quest') {
-      const question = (
-        <View style={styles.container}>
-          <Text style={styles.subtitle}>
-            {decks[this.state.currDeck].cards[this.state.currCard].front}
-          </Text>
-        </View>
-      );
-
-      const check = (
-        <Button
-          title="Check"
-          onPress={() => {
-            this.flip();
-          }}
+     return (
+        <TestQuestion
+          decks={decks}
+          state={this.state}
+          goBackBtn={this.goBackBtn.bind(this)}
+          flip={this.flip.bind(this)}
+          stateHandler={this.stateHandler.bind(this)}
         />
       );
-
-      return (
-        <View style={styles.container}>
-          {question}
-          {check}
-          {this.goBackBtn('deckMenu', this.state.currDeck)}
-        </View>
-      );
     } else if (this.state.page === 'test.answ') {
-      const answer = (
-        <View style={styles.container}>
-          <Text style={styles.subtitle}>
-            {decks[this.state.currDeck].cards[this.state.currCard].back}
-          </Text>
-        </View>
-      );
-
-      const guess = (
-        <View style={styles.container}>
-          <Button
-            title="right"
-            onPress={() => {
-              this.answered(true);
-            }}
-          />
-          <Button
-            title="wrong"
-            onPress={() => {
-              this.answered(false);
-            }}
-          />
-        </View>
-      );
-
-      return (
-        <View style={styles.container}>
-          {answer}
-          {guess}
-          {this.goBackBtn('deckMenu', this.state.currDeck)}
-        </View>
+     return (
+        <TestAnswer
+          decks={decks}
+          state={this.state}
+          goBackBtn={this.goBackBtn.bind(this)}
+          answered={this.answered.bind(this)}
+          stateHandler={this.stateHandler.bind(this)}
+        />
       );
     } else if (this.state.page === 'renameDeck') {
       const submitRenameDeckBtn = (
